@@ -40,13 +40,13 @@ const config: HardhatUserConfig = {
     apiKey: ETHERSCAN_API_KEY
   },
   circom: {
-    inputBasePath: "./circuits/",
+    inputBasePath: "./circuits",
     outputBasePath: "./snarkKeys/",
     ptau: "https://hermezptau.blob.core.windows.net/ptau/powersOfTau28_hez_final_15.ptau",
     circuits: [
       {
         name: "authorize",
-        // input: "inputs/authorize.json",
+        input: "inputs/authorize.json",
         // protocol: "groth16", // No protocol, so it defaults to groth16
       },
     ],
