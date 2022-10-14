@@ -12,10 +12,6 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/smt/smthash_poseidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 
-
-
-
-
 template Excludes(nLevels) {
     signal private input privateKey;
     signal private input R8x;

@@ -15,7 +15,10 @@
     "hardhat": "^2.12.0"
   },
   "dependencies": {
+    "@cedoor/smt": "^0.1.7",
+    "@noble/secp256k1": "^1.7.0",
     "@openzeppelin/contracts": "^4.7.3",
+    "@zk-kit/sparse-merkle-tree": "^0.2.0",
     "circomlib": "^2.0.5",
     "dotenv": "^16.0.3",
     "eth-sig-util": "^3.0.1",

@@ -2,7 +2,8 @@ pragma circom 2.0.3;
 
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/pedersen.circom";
-include "merkleTree.circom";
+include "./ECDSA/ECDSA.circom";
+// include "merkleTree.circom";
 
 // computes Pedersen(nullifier + secret)
 template CommitmentHasher() {
@@ -28,42 +29,75 @@ template CommitmentHasher() {
 }
 
 // Verifies that commitment that corresponds to given secret and nullifier is included in the merkle tree of deposits
-template Authorize(levels) {
+template Authorize(levels, n, k) {
+    // Pub inputs
     signal input root;
-    signal input nullifierHash;
-    signal input recipient; // not taking part in any computations
-    signal input relayer;  // not taking part in any computations
-    signal input fee;      // not taking part in any computations
-    signal input refund;   // not taking part in any computations
-    signal private input nullifier;
-    signal private input secret;
-    signal private input pathElements[levels];
-    signal private input pathIndices[levels];
+    signal input pubKey[2][k];
+    signal input payloadHash[k];
+    signal input deadline; 
+    signal input nullifier;
 
-    component hasher = CommitmentHasher();
-    hasher.nullifier <== nullifier;
-    hasher.secret <== secret;
-    hasher.nullifierHash === nullifierHash;
+    // Priv inputs
 
-    component tree = MerkleTreeChecker(levels);
-    tree.leaf <== hasher.commitment;
-    tree.root <== root;
-    for (var i = 0; i < levels; i++) {
-        tree.pathElements[i] <== pathElements[i];
-        tree.pathIndices[i] <== pathIndices[i];
+    // signal input signature;
+    signal input r[k];
+    signal input s[k];
+
+    signal input pathElements[levels];
+    signal input pathIndices[levels];
+
+
+    // 1. Verify valid signature
+
+    signal signatureOutput;
+
+    component messageVerifier = ECDSAVerifyNoPubkeyCheck(n, k); // k=4 registers of n=64 slots each
+    for (var i = 0; i < k; i++) {
+        messageVerifier.r[i] <== r[i];
+        messageVerifier.s[i] <== s[i];
+        messageVerifier.pubkey[0][i] <== pubKey[0][i]; // [2][k];
+        messageVerifier.pubkey[1][i] <== pubKey[1][i]; // [2][k];
+        messageVerifier.msghash[i] <== payloadHash[i]; // [k];
     }
+    signatureOutput <== messageVerifier.result;
+
+    // 2. 
+
+
+    // signal input nullifierHash;
+    // signal input recipient; // not taking part in any computations
+    // signal input relayer;  // not taking part in any computations
+    // signal input fee;      // not taking part in any computations
+    // signal input refund;   // not taking part in any computations
+    // signal private input nullifier;
+    // signal private input secret;
+    // signal private input pathElements[levels];
+    // signal private input pathIndices[levels];
+
+    // component hasher = CommitmentHasher();
+    // hasher.nullifier <== nullifier;
+    // hasher.secret <== secret;
+    // hasher.nullifierHash === nullifierHash;
+
+    // component tree = MerkleTreeChecker(levels);
+    // tree.leaf <== hasher.commitment;
+    // tree.root <== root;
+    // for (var i = 0; i < levels; i++) {
+    //     tree.pathElements[i] <== pathElements[i];
+    //     tree.pathIndices[i] <== pathIndices[i];
+    // }
 
     // Add hidden signals to make sure that tampering with recipient or fee will invalidate the snark proof
     // Most likely it is not required, but it's better to stay on the safe side and it only takes 2 constraints
     // Squares are used to prevent optimizer from removing those constraints
-    signal recipientSquare;
-    signal feeSquare;
-    signal relayerSquare;
-    signal refundSquare;
-    recipientSquare <== recipient * recipient;
-    feeSquare <== fee * fee;
-    relayerSquare <== relayer * relayer;
-    refundSquare <== refund * refund;
+    // signal recipientSquare;
+    // signal feeSquare;
+    // signal relayerSquare;
+    // signal refundSquare;
+    // recipientSquare <== recipient * recipient;
+    // feeSquare <== fee * fee;
+    // relayerSquare <== relayer * relayer;
+    // refundSquare <== refund * refund;
 }
 
-component main { public [protectedLength, protectedHash] } = Authorize(10);
+component main { public [root, pubKey, payloadHash, deadline, nullifier] } = Authorize(10, 64, 4);

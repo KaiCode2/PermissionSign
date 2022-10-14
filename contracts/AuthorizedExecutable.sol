@@ -25,8 +25,9 @@ interface IVerifier {
  * permitting anyone to sign transactions off-chain and have the same on-chain
  * result as though they'd submitted it themself.
  */
-abstract contract AuthorizedExecutable is EIP712, MerkleTreeWithHistory, ReentrancyGuard {
+contract AuthorizedExecutable is EIP712, MerkleTreeWithHistory, ReentrancyGuard {
 
+    
 
     IVerifier public verifier;
 
