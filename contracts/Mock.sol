@@ -18,12 +18,16 @@ contract MockPermissions is Permissions {
         set(newX, msg.sender);
     }
 
-    function set(uint256 newX, address from) public {
-        require(from == msg.sender || from == address(this), "Invalid");
+    function set(uint256 newX, address from) onlyPermissioned(from) public {
         require(from == owner, "Unauthorized");
 
         x = newX;
 
         emit ValueChanged(newX);
+    }
+
+    modifier onlyPermissioned(address from) {
+        require(from == msg.sender || from == address(this), "Invalid");
+        _;
     }
 }
