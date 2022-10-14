@@ -31,6 +31,9 @@ abstract contract Permissions is EIP712 {
         require(block.timestamp < deadline, "Signed transaction expired");
         require(payload.length >= 32, "Payload of insufficient size");
 
+        // TODO: this can actually be removed from the payload and instead
+        // be recovered from the signed message - in so doing, decreasing
+        // payload's by 32 bytes
         address signer = abi.decode(payload[payload.length - 32:], (address));
 
         require(signer != address(0x0), "Invalid signer null address");

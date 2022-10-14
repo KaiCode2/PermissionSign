@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "hardhat-deploy";
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-circom";
 import { config as configEnv } from "dotenv";
 
 configEnv();
@@ -37,6 +38,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY
+  },
+  circom: {
+    inputBasePath: "./circuits",
+    ptau: "https://hermezptau.blob.core.windows.net/ptau/powersOfTau28_hez_final_15.ptau",
+    circuits: [
+      {
+        name: "mimc_cid",
+        // protocol: "groth16", // No protocol, so it defaults to groth16
+      },
+    ],
   },
 };
 
