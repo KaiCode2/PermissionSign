@@ -46,7 +46,7 @@ const config: HardhatUserConfig = {
     circuits: [
       {
         name: "authorize",
-        input: "inputs/authorize.json",
+        // input: "inputs/authorize.json",
         // protocol: "groth16", // No protocol, so it defaults to groth16
       },
     ],

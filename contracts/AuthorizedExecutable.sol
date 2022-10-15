@@ -30,6 +30,8 @@ contract AuthorizedExecutable is EIP712, MerkleTreeWithHistory, ReentrancyGuard 
     
 
     IVerifier public verifier;
+    uint256 immutable creationBlock; // Used to base deadlines -
+    // allowing Merkle tree to use first 16 bytes of each leage to be the deadline (minutes creation block)
 
     mapping(bytes32 => bool) public nullifiers;
     
@@ -39,6 +41,7 @@ contract AuthorizedExecutable is EIP712, MerkleTreeWithHistory, ReentrancyGuard 
         uint32 _merkleTreeHeight
     ) EIP712("AuthorizedExecutable", "1") MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
         verifier = _verifier;
+        creationBlock = block.number;
     }
 
 
@@ -66,6 +69,12 @@ contract AuthorizedExecutable is EIP712, MerkleTreeWithHistory, ReentrancyGuard 
             ),
             "Invalide proof"
         );
+
+        uint128 blockOfLeaf = uint128((deadline - creationBlock) << 128); // TODO: check if it's << or >> for bitwise op
+        bytes16 hashOfLeaf = bytes16(keccak256(abi.encodePacked(payload, nullifier)) << 128);
+        bytes32 leaf = bytes32(uint256(uint128(blockOfLeaf)) << 128 | uint128(hashOfLeaf));
+
+        _insert(leaf);
 
         return true;
     }
